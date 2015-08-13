@@ -26,10 +26,8 @@ public class UpdateService extends Service {
             registerNewReceiver();
         }
 
-        RemoteViews widgetView = getWidgetRemoteView();
-
         AppWidgetManager manager = AppWidgetManager.getInstance(this);
-        manager.updateAppWidget(new ComponentName(this, BatteryClockWidget.class), widgetView);
+        manager.updateAppWidget(new ComponentName(this, BatteryClockWidget.class), getWidgetRemoteView());
 
         return START_STICKY;
     }
@@ -61,28 +59,27 @@ public class UpdateService extends Service {
     }
 
     private RemoteViews getWidgetRemoteView() {
-        SharedPreferences batteryPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
         int level = 0;
-        if (batteryIntent != null) {
-            level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-        }
+        int plugged = 0;
         int scale = 100;
         if (batteryIntent != null) {
+            level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
             scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
-        }
-        int plugged = 0;
-        if (batteryIntent != null) {
             plugged = batteryIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
         }
 
         float batteryPct = level / (float) scale;
 
-        float width = batteryPrefs.getFloat("width", 500);
-        float height = batteryPrefs.getFloat("height", 500);
-        float strokeWidth = Utils.dipToPixels(this, 4);
+        int size = prefs.getInt("size", 500);
+        float strokeWidth = Utils.dpToPx(4);
+
+        if (size == 0) {
+            size = 500;
+        }
 
         int color;
         if (plugged > 0) {
@@ -101,9 +98,8 @@ public class UpdateService extends Service {
             }
         }
 
-        float radius = (width - strokeWidth) / 2;
-        float center_x = width / 2;
-        float center_y = height / 2;
+        float radius = (size - strokeWidth) / 2;
+        float center = size / 2;
 
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
@@ -111,11 +107,11 @@ public class UpdateService extends Service {
         paint.setStrokeWidth(strokeWidth);
         paint.setAntiAlias(true);
 
-        Bitmap bmp = Bitmap.createBitmap((int) width, (int) height, Bitmap.Config.ARGB_8888);
+        Bitmap bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmp);
 
         RectF oval = new RectF();
-        oval.set(center_x - radius, center_y - radius, center_x + radius, center_y + radius);
+        oval.set(center - radius, center - radius, center + radius, center + radius);
         canvas.drawArc(oval, 270 - (batteryPct * 360), batteryPct * 360, false, paint);
 
         RemoteViews widgetView = new RemoteViews(this.getPackageName(), R.layout.widget);

@@ -7,13 +7,12 @@
     <ImageView
         android:id="@+id/imgBattery"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:contentDescription="@string/img_battery_description" />
 
     <AnalogClock
         android:id="@+id/clock"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="0dp"
-        android:padding="0dp" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>

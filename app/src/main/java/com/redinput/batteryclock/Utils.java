@@ -1,14 +1,11 @@
 package com.redinput.batteryclock;
 
-import android.content.Context;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
+import android.content.res.Resources;
 
 public class Utils {
 
-    public static float dipToPixels(Context context, float dipValue) {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
 }

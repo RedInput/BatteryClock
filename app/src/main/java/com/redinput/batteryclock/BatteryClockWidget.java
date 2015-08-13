@@ -2,7 +2,6 @@ package com.redinput.batteryclock;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,31 +20,27 @@ public class BatteryClockWidget extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager widgetManager, int[] widgetIds) {
         super.onUpdate(context, widgetManager, widgetIds);
 
-        ComponentName thisAppWidget = new ComponentName(context.getPackageName(), this.getClass().getName());
-        int[] appWidgetIds = widgetManager.getAppWidgetIds(thisAppWidget);
-
-        Bundle newOptions = widgetManager.getAppWidgetOptions(appWidgetIds[0]);
-        float minWidth = Utils.dipToPixels(context, newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH));
-        float minHeight = Utils.dipToPixels(context, newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT));
-        float maxWidth = Utils.dipToPixels(context, newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH));
-        float maxHeight = Utils.dipToPixels(context, newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT));
+        Bundle newOptions = widgetManager.getAppWidgetOptions(widgetIds[0]);
+        float minWidth = Utils.dpToPx(newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH));
+        float minHeight = Utils.dpToPx(newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT));
+        float maxWidth = Utils.dpToPx(newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH));
+        float maxHeight = Utils.dpToPx(newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT));
 
         float width = (minWidth + maxWidth) / 2;
         float height = (minHeight + maxHeight) / 2;
 
-        SharedPreferences batteryPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor batteryEdit = batteryPrefs.edit();
+        int size = (int) width;
+        if (height < width) {
+            size = (int) height;
+        }
 
-        batteryEdit.putFloat("width", width);
-        batteryEdit.putFloat("height", height);
-        batteryEdit.apply();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editPrefs = prefs.edit();
+
+        editPrefs.putInt("size", size);
+        editPrefs.apply();
 
         context.startService(new Intent(context, UpdateService.class));
-    }
-
-    @Override
-    public void onDeleted(Context context, int[] widgetIds) {
-        super.onDeleted(context, widgetIds);
     }
 
     @Override
